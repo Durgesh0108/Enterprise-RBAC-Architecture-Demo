@@ -77,7 +77,7 @@ export async function POST(req) {
 ### C. Asynchronous Billing Automation ###
 To prevent main-thread blocking during complex invoice PDF generation, the system utilizes an event-driven approach. When a project status is updated to `COMPLETED`, the system triggers a background process that compiles the data, generates the PDF, and uploads it to AWS S3 for secure storage.
 
-## 5. Quantitative Results & Impact ##
+## 5. Quantitative Results & Impact 
 * **Latency Reduction:** Automated invoice generation reduced the process from **4 hours to ~40 minutes (85% reduction)** per week.
 
 * **Error Elimination:** Zero instances of data mismatch between Marketing and Accounts departments post-launch.
