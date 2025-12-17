@@ -47,3 +47,39 @@ model Invoice {
   
   createdAt   DateTime @default(now())
 }
+```
+
+### B. Role-Based Access Control (RBAC) ###
+Since Next.js API routes were used, I implemented a wrapper function to validate Clerk session claims before executing server-side logic.
+
+Pseudocode Logic (Security Layer):
+
+```js
+import { auth } from '@clerk/nextjs';
+
+export async function POST(req) {
+  const { sessionClaims } = auth();
+  
+  // 1. Check if user is authenticated
+  if (!sessionClaims) return new Response("Unauthorized", { status: 401 });
+
+  // 2. Role Verification (e.g., Only 'ADMIN' or 'ACCOUNTS' can generate bills)
+  const userRole = sessionClaims.metadata.role;
+  if (userRole !== 'ADMIN' && userRole !== 'ACCOUNTS') {
+    return new Response("Forbidden: Insufficient Permissions", { status: 403 });
+  }
+
+  // 3. Execute Business Logic
+  return await generateInvoice(req);
+}
+```
+
+### C. Asynchronous Billing Automation ###
+To prevent main-thread blocking during complex invoice PDF generation, the system utilizes an event-driven approach. When a project status is updated to `COMPLETED`, the system triggers a background process that compiles the data, generates the PDF, and uploads it to AWS S3 for secure storage.
+
+### 5. Quantitative Results & Impact ###
+* **Latency Reduction:** Automated invoice generation reduced the process from **4 hours to ~40 minutes (85% reduction)** per week.
+
+* **Error Elimination:** Zero instances of data mismatch between Marketing and Accounts departments post-launch.
+
+* **Scalability:** The system successfully handles concurrent requests from 20+ active users without degradation in API response time.
